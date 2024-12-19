@@ -5,10 +5,68 @@ import (
 	"fmt"
 )
 
-// simple bank struct for owner and bnk balance
+// SimpleBank struct for owner and bank balance
 type SimpleBank struct {
 	Owner   string
 	Balance map[string]uint
+}
+
+// CreateSimpleBank creates a new instance of SimpleBank
+func CreateSimpleBank(owner string) *SimpleBank {
+	return &SimpleBank{
+		Owner:   owner,
+		Balance: make(map[string]uint),
+	}
+}
+
+// Transfer allows funds transfer from sender to receiver
+func (bank *SimpleBank) Transfer(sender, receiver string, amount uint) error {
+	if sender == receiver {
+		return errors.New("You cannot transfer into your own account")
+	}
+	if bank.Balance[sender] < amount {
+		return errors.New("Insufficient amount in your account to transfer")
+	}
+	bank.Balance[sender] -= amount
+	bank.Balance[receiver] += amount
+	fmt.Printf("Transfer: %s transferred %d Ether to %s\n", sender, amount, receiver)
+	return nil
+}
+
+// Withdraw allows the owner to withdraw funds from their account
+func (bank *SimpleBank) Withdraw(owner string, amount uint) error {
+	if bank.Owner != owner {
+		return errors.New("Only the owner can withdraw funds from their account")
+	}
+	if bank.Balance[owner] < amount {
+		return errors.New("Insufficient funds to withdraw")
+	}
+	bank.Balance[owner] -= amount
+	fmt.Printf("Withdraw: %s withdrew %d Ether\n", owner, amount)
+	return nil
+}
+
+// Deposit allows any user to deposit funds to their account
+func (bank *SimpleBank) Deposit(owner string, amount uint) error {
+	if amount <= 0 {
+		return errors.New("The amount to deposit should not be less than or equal to 0")
+	}
+	bank.Balance[owner] += amount
+	fmt.Printf("Deposit: %s deposited %d Ether\n", owner, amount)
+	return nil
+}
+
+// GetBalance returns the balance of the user's account
+func (bank *SimpleBank) GetBalance(owner string) uint {
+	return bank.Balance[owner]
+}
+
+// CheckOwner ensures only the owner can modify certain functionalities
+func (bank *SimpleBank) CheckOwner(owner string) error {
+	if bank.Owner != owner {
+		return errors.New("Only the owner can modify")
+	}
+	return nil
 }
 
 func main() {
@@ -40,67 +98,4 @@ func main() {
 
 	// Check balances after withdrawal
 	fmt.Println("Balance of", account1, ":", bank.GetBalance(account1))
-}
-
-// function to create the new instance of SimplBank
-func CreateSimpleBank(owner string) *SimpleBank {
-	return &SimpleBank{
-		Owner:   owner,
-		Balance: make(map[string]uint),
-	}
-}
-
-// function (method) to allow the owner of the bank transfer funds to others
-func (bank *SimpleBank) Transfer(sender, receiver string, amount uint) error {
-	if sender == receiver {
-		return errors.New("You can not transfer into own account:")
-	}
-	if bank.Balance[sender] < amount {
-		return errors.New("Insufficient amount in your account to transfer:")
-	}
-	bank.Balance[sender] -= amount
-	bank.Balance[receiver] += amount
-	fmt.Printf("Transfer: %s transferred %d Ether to %s\n", sender, amount, receiver)
-	return nil
-}
-
-// function to allow the user to withdraw funds fron the account
-func (bank *SimpleBank) Withdraw(owner string, amount uint) error {
-	if bank.Owner != owner {
-		return errors.New("Only the owner can withdraw funds from their account")
-	}
-
-	if bank.Balance[owner] < amount {
-		return errors.New("Insufficient funds to withdraw ")
-	}
-	bank.Balance[owner] -= amount
-	fmt.Printf("Withdraw: %s withdrew %d Ether\n", owner, amount)
-	return nil
-}
-
-// function that allow oner to deposit funds to their accounts
-func (bank *SimpleBank) Deposit(owner string, amount uint) error {
-	if bank.Owner != owner {
-		return errors.New("Only the owner can deposit to their account")
-	}
-
-	if amount <= 0 {
-		return errors.New("The aount to deposite should not be less than 0")
-	}
-	bank.Balance[owner] += amount
-	fmt.Printf("Deposit: %s deposited %d Ether\n", owner, amount)
-	return nil
-}
-
-// function to get the balance of the user
-func (bank *SimpleBank) GetBalance(owner string) uint {
-	return bank.Balance[owner]
-}
-
-// function to checkOwner to ensure only owner access the account
-func (bank *SimpleBank) CheckOwner(owner string) error {
-	if bank.Owner != owner {
-		return errors.New("only the owner can modify")
-	}
-	return nil
 }
