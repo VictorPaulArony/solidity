@@ -6,18 +6,28 @@ pragma solidity ^0.8.0;
 contract SimpleBank{
 
     //variable of type adress to store owner addres
-    address payable public owner;
-    //type that store the owner acount balance
-    uint public  balance;
+    address  public owner;
+    //type mapping that store the owner acount balance
+    mapping(address => uint) public balance;
 
     //adding an event for deposit and withdrawals
     //events are used to log changes to the state of the contract(tracking withdraw and deposit)
-    event Deposit(address indexed_from, uint amount);
-    event Withdrawal(address indexed_from, uint amount);
+    event Deposit(address indexed from, uint amount);
+    event Withdrawal(address indexed from, uint amount);
+    event Transfer(address indexed from, address indexed to, uint amount);
 
     //special function that executes and set owner variable to address of the user who deloyed the contract
     constructor(){
-        owner = payable(msg.sender);
+        owner = msg.sender;
+    }
+
+    //function modifier that only allow owner to modify
+    modifier onlyOwner(){
+        require(
+            msg.sender == owner,
+            "Only the owner can make modifications"
+        );
+        _;
     }
 
     //function to manage the deposit
