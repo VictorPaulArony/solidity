@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 contract Lotto{
     address public owner;
-    address[] public players ;
+    address[] public players;
     uint public  ticketPrice;
     bool public lottoOpen;
 
     event TicketPurchased(address indexed player, uint amount);
     event WinnerSelected(address indexed winner, uint prize);
 
-    constructor{
+    constructor(uint _ticketPrice) {
         owner = msg.sender;
         ticketPrice = _ticketPrice;
         lottoOpen = true;
@@ -26,19 +26,19 @@ contract Lotto{
 
     modifier isLottoOpen(){
         require(
-            lottoopen,
+            lottoOpen,
             "The lottery is opened"
         );
         _;
     }
 
-    function buyTicket()public payable lottoOpen{
+    function buyTicket()public payable isLottoOpen{
         require(
             msg.value == ticketPrice,
             "Incorrect ticket price"
         );
 
-        players.Push(msg.sender);
+        players.push(msg.sender);
         emit TicketPurchased(msg.sender, msg.value);
     }
 
@@ -47,7 +47,10 @@ contract Lotto{
             players.length > 0,
             "No player in the lottery"
         );
-        randomIndex = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, player)))% players.length;
+        // uint randomIndex = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, players)))% players.length;
+        // address winner = players[randomIndex];
+
+         uint randomIndex = uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, players))) % players.length;
         address winner = players[randomIndex];
 
         uint prize = address(this).balance;
@@ -58,11 +61,13 @@ contract Lotto{
             "Prize transfer failed"
         );
         emit  WinnerSelected(winner, prize);
-        player = new address lottoOpen = false;
+
+        players = new address [](0);
+        lottoOpen = false;
     }
     function startNewRound(uint _ticketPrice) public onlyOwner{
         require(
-            !lotoOpen,
+            !lottoOpen,
             "Current lotto is stil active"
         );
         ticketPrice = _ticketPrice;
