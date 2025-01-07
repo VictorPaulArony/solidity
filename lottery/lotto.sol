@@ -3,12 +3,12 @@ pragma solidity ^0.8.0;
 
 contract Lotto{
     address public owner;
-    address[] public payable ;
+    address[] public players ;
     uint public  ticketPrice;
     bool public lottoOpen;
 
     event TicketPurchased(address indexed player, uint amount);
-    event WinnerSelected(address indexed winner uint prize);
+    event WinnerSelected(address indexed winner, uint prize);
 
     constructor{
         owner = msg.sender;
