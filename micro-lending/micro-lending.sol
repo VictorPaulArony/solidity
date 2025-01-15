@@ -58,7 +58,11 @@ contract MicroLending{
     }
 
     //function to enable the user to ask for loan
-    function requestLoan(uint _amount,  uint256 _interestRate, uint256 _term, uint256 _penaltyRate )external {
+    function requestLoan(uint _amount )external {
+        uint256  _interestRate = 2;
+        uint256  _term = 2;
+        uint256 _penaltyRate = 2;
+
         require(
             _amount > 0 ,
             "Loan amount mst be great  than zero"
