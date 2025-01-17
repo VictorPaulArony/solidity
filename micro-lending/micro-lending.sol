@@ -58,8 +58,9 @@ contract MicroLending {
     mapping(address => bool) public hasOngoingInvestment;
     mapping(uint => LoanApplication) public applications;
     
-    uint public numApplications;
+    uint public numOfApplications;
     uint public numLoans;
+
     //define the events for the contract
     event LoanRequested(
         address borrower,
@@ -76,6 +77,11 @@ contract MicroLending {
     );
     event LoanCLosed(address borrower, uint loanIndex);
     event Penatly(address borrower, uint amount, uint loanIndex);
+    event ApplicationCreated(
+        uint applicationId, 
+        address borrower, 
+        uint amount
+    ); //for tracking new applications
 
     //modifers definition for the contract access
     modifier OnlyLender(address lender) {
@@ -125,6 +131,61 @@ contract MicroLending {
         balance[msg.sender] += msg.value;  // Add deposit to lender balance
     }
 
+     // New function to create loan application
+    function createApplication(
+        uint duration,
+        uint interestRate,
+        uint creditAmount,
+        string memory otherData
+    ) external {
+        require(!hasOngoingLoan[msg.sender], "Already has an ongoing loan");
+        require(!hasOngoingApplication[msg.sender], "Already has an ongoing application");
+        require(borrowers[msg.sender].active, "Must be a registered borrower");
+
+        applications[numOfApplications] = LoanApplication({
+            openApp: true,
+            applicationId: numOfApplications,
+            borrower: msg.sender,
+            duration: duration,
+            creditAmount: creditAmount,
+            interestRate: interestRate,
+            otherData: otherData
+        });
+
+        numOfApplications += 1;
+        hasOngoingApplication[msg.sender] = true;
+        
+        emit ApplicationCreated(numOfApplications - 1, msg.sender, creditAmount);
+    }
+
+        // Function to get loan applications info as by the borrowers
+    function getApplicationData(uint index) external view returns (
+        uint[] memory numericalData,
+        string memory otherData,
+        address borrower
+    ) {
+        LoanApplication storage app = applications[index];
+        uint[] memory data = new uint[](4);
+        data[0] = index;
+        data[1] = app.duration;
+        data[2] = app.creditAmount;
+        data[3] = app.interestRate;
+        
+        return (data, app.otherData, app.borrower);
+    }
+
+    // Check if application is open
+    function isApplicationOpen(uint index) public view returns (bool) {
+        return applications[index].openApp;
+    }
+
+    // Check if loan is open
+    function isLoanOpen(uint loanIndex) public view returns (bool) {
+        require(loanIndex < borrowerLoans[msg.sender].length, "Invalid loan index");
+        return borrowerLoans[msg.sender][loanIndex].active;
+    }
+
+
     //function to register borrower and enable them to ask for loan
     function requestLoan(uint _amount) external {
         uint256 _interestRate = 2;
@@ -148,7 +209,11 @@ contract MicroLending {
             borrower: msg.sender,
             lender: payable(address(0)),//initially, no lender assiged to this untill approvall
             active: false,
-            repaid: false
+            repaid: false,
+            startTime: block.timestamp,
+            monthlyCheckpoint: 0,
+            originalAmount: _amount,
+            applicationId: numOfApplications
         });
 
         //add newLoan to the loan array/list
@@ -180,18 +245,21 @@ contract MicroLending {
         );
 
         //updating the state of the contract
+        uint loanAmount = msg.value;
+        uint totalLoanOwned = loanAmount + (loanAmount * loan.interestRate) / 100;
+        loan.loanAmount += totalLoanOwned;
         loan.lender = payable(msg.sender);
         loan.active = true;
         //transfare from lender to borrower
         balance[msg.sender] -= msg.value;
-        balance[borrower] += msg.value;
+        balance[borrower] += totalLoanOwned;
 
         //logging the fuction
         emit LoanApproved(msg.sender, borrower, msg.value, loan.dueDate);
     }
 
     //function to anable the loaned to make repayment of the loan
-    function repayment(
+    function loanrepayment(
         uint loanIndex
     ) external payable OnlyBorrower(msg.sender) {
         require(
@@ -203,8 +271,10 @@ contract MicroLending {
         require(loan.active == true, "Loan is not active.");
         require(msg.value > 0, "Repayment amount must be greater than zero.");
 
+        
         //update the repayment
         loan.amountRepaid += msg.value;
+        loan.loanAmount -= msg.value;
         balance[msg.sender] -= msg.value;
         balance[loan.lender] += msg.value;
 
@@ -219,12 +289,12 @@ contract MicroLending {
         }
 
         //check if the loan if already paid by the borrower
-        if (
-            loan.amountRepaid >=
-            loan.loanAmount + (loan.loanAmount * loan.interestRate) / 100
-        ) {
+        if (loan.amountRepaid == 0) {
             loan.active = false;
             loan.repaid = true;
+            hasOngoingLoan[msg.sender] = false;
+            hasOngoingApplication[msg.sender] = false;
+            hasOngoingInvestment[loan.lender] = false;
             emit LoanCLosed(msg.sender, loanIndex);
         }
 
@@ -267,6 +337,14 @@ contract MicroLending {
     // //function to get the borrower's balances
     // function getBorrowerBalance() external view returns (uint256) {
     //     return borrowerBalance[msg.sender];
+    // }
+
+    // Function to withdraw balance
+    // function withdraw(uint amount) external returns (uint) {
+    //     require(amount <= balance[msg.sender], "Insufficient balance");
+    //     balance[msg.sender] -= amount;
+    //     payable(msg.sender).transfer(amount);
+    //     return amount;
     // }
 
 
