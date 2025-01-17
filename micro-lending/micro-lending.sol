@@ -75,7 +75,7 @@ contract MicroLending {
     //contract functions definations
 
     //function to enable regiser of lender accounts
-    function registerLender(string memory _name) external  {
+    function createLender(string memory _name) external  {
         require(!lenders[msg.sender].active, "Lender already exists");
         Lender memory lender;
         lenders[msg.sender] = lender;//update lender to lenders map
@@ -86,7 +86,7 @@ contract MicroLending {
     }
 
     //function to enable regiser of borrower accounts
-    function registerBorrower(string memory _name) external  {
+    function createBorrower(string memory _name) external  {
         require(!borrowers[msg.sender].active, "Borrower already exists");
         Borrower memory borrower;
         lenders[msg.sender] = borrower;//update borrower to lenders map
