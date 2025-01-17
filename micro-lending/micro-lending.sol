@@ -82,18 +82,25 @@ contract MicroLending {
         lender.name = _name;
         lender.lenderWallet = msg.sender;
         lender.active = true;
-        lender[msg.sender] = 0; //initial balance to zero during registration
+        balance[msg.sender] = 0; //initial balance to zero during registration
     }
 
     //function to enable regiser of borrower accounts
     function createBorrower(string memory _name) external  {
         require(!borrowers[msg.sender].active, "Borrower already exists");
         Borrower memory borrower;
-        lenders[msg.sender] = borrower;//update borrower to lenders map
+        borrowers[msg.sender] = borrower;//update borrower to borrowers map
         borrower.name = _name;
-        borrower.lenderWallet = msg.sender;
+        borrower.borrowerWallet = msg.sender;
         borrower.active = true;
-        borrower[msg.sender] = 0; //initial balance to zero during registration
+        balance[msg.sender] = 0; //initial balance to zero during registration
+    }
+
+    // Function to register Lender and Deposit Funds to there account
+    function registerLender() external payable {
+        require(msg.value > 0, "Lender must deposit funds to become eligible to lend.");
+        require(lenders[msg.sender].active, "You must create a lender account first.");
+        balance[msg.sender] += msg.value;  // Add deposit to lender balance
     }
 
     //function to register borrower and enable them to ask for loan
@@ -106,13 +113,14 @@ contract MicroLending {
             _amount > 0, 
             "Loan amount must be great  than zero"
         );
+        require(borrowers[msg.sender].active, "You must create a borrower account first.");
 
         //updating the state of the cotract of the loan
         Loan memory newLoan = Loan({
             loanAmount: _amount,
             interestRate: _interestRate,
             loanTerm: _term,
-            dueDate: block.timestamp + (_term * 1 days),
+            dueDate: block.timestamp + (_term * 1 days),// Loan due date set by loan term
             amountRepaid: 0,
             penaltyRate: _penaltyRate,
             borrower: msg.sender,
@@ -150,10 +158,11 @@ contract MicroLending {
         );
 
         //updating the state of the contract
-        loan.lender = payable(address(0));
+        loan.lender = payable(msg.sender);
         loan.active = true;
-        lenderBalance[msg.sender] -= msg.value;
-        borrowerBalance[borrower] += msg.value;
+        //transfare from lender to borrower
+        balance[msg.sender] -= msg.value;
+        balance[borrower] += msg.value;
 
         //logging the fuction
         emit LoanApproved(msg.sender, borrower, msg.value, loan.dueDate);
@@ -174,20 +183,20 @@ contract MicroLending {
 
         //update the repayment
         loan.amountRepaid += msg.value;
-        borrowerBalance[msg.sender] -= msg.value;
-        lenderBalance[loan.lender] += msg.value;
+        balance[msg.sender] -= msg.value;
+        balance[loan.lender] += msg.value;
 
         //check if there is penalty application to the borrower
         if (block.timestamp > loan.dueDate) {
             //calculate the penalty for the borrower
             uint penalty = (msg.value * loan.penaltyRate) / 10000;
             //update the borrower and lender balance
-            lenderBalance[loan.lender] += penalty;
-            borrowerBalance[msg.sender] -= penalty;
+            balance[loan.lender] += penalty;
+            balance[msg.sender] -= penalty;
             emit Penatly(msg.sender, penalty, loanIndex);
         }
 
-        //check if the loan if already paid by the user
+        //check if the loan if already paid by the borrower
         if (
             loan.amountRepaid >=
             loan.loanAmount + (loan.loanAmount * loan.interestRate) / 100
@@ -229,13 +238,19 @@ contract MicroLending {
     }
 
     //function to get the lenders balances
-    function getLenderBalance() external view returns (uint256) {
-        return lenderBalance[msg.sender];
-    }
+    // function getLenderBalance() external view returns (uint256) {
+    //     return lender[msg.sender];
+    // }
 
-    //function to get the borrower's balances
-    function getBorrowerBalance() external view returns (uint256) {
-        return borrowerBalance[msg.sender];
+    // //function to get the borrower's balances
+    // function getBorrowerBalance() external view returns (uint256) {
+    //     return borrowerBalance[msg.sender];
+    // }
+
+
+     //function to get the lenders and borrowers balances
+    function getLenderBalance() external view returns (uint256) {
+        return balance[msg.sender];
     }
 
     //function to get the loan detais info
