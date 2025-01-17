@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 contract MicroLending{
     //defining the loa struct 
     struct Loan{
-        address lender;
+        address payable lender;//owner of the loan 
         address borrower;
         uint  loanAmount;
         uint interestRate;
@@ -14,6 +14,7 @@ contract MicroLending{
         uint amountRepaid;
         uint penaltyRate;
         bool active;
+        bool repaid;
     }
 
     //mapping the  address 
@@ -67,16 +68,9 @@ contract MicroLending{
             _amount > 0 ,
             "Loan amount mst be great  than zero"
         );
-        require(
-            _interestRate > 0,
-             "Interest rate must be greater than zero."
-             );
-        require(
-            _term > 0, 
-            "Loan term must be greater than zero."
-            );
+      
 
-            //updating the state of the cotract 
+            //updating the state of the cotract of the loan
         Loan memory newLoan = Loan({
             loanAmount: _amount,
             interestRate: _interestRate,
@@ -85,8 +79,9 @@ contract MicroLending{
             amountRepaid: 0,
             penaltyRate: _penaltyRate,
             borrower: msg.sender,
-            lender: address(0),
-            active: false
+            lender: payable (address(0)),
+            active: false,
+            repaid: false
         });
 
         //add newLoan to the loan array/list
@@ -114,7 +109,7 @@ contract MicroLending{
         );
 
         //updating the state of the contract
-        loan.lender = msg.sender;
+        loan.lender = payable (address(0));
         loan.active = true;
         lenderBalance[msg.sender] -= msg.value;
         borrowerBalance[borrower] += msg.value;
@@ -167,13 +162,13 @@ contract MicroLending{
     }
 
     //function to get the loan details 
-     function getLoanDetails(address borrower, uint256 loanIndex) external view returns (Loan memory) {
-        require(
-            loanIndex < borrowerLoans[borrower].length, 
-            "Invalid loan index."
-            );
-        return borrowerLoans[borrower][loanIndex];
-    }
+    //  function getLoanDetails(address borrower, uint256 loanIndex) external view returns (Loan memory) {
+    //     require(
+    //         loanIndex < borrowerLoans[borrower].length, 
+    //         "Invalid loan index."
+    //         );
+    //     return borrowerLoans[borrower][loanIndex];
+    // }
 
     //function to get the lenders balances 
     function getLenderBalance() external view returns (uint256) {
@@ -183,6 +178,35 @@ contract MicroLending{
     //function to get the borrower's balances 
     function getBorrowerBalance() external view returns (uint256) {
         return borrowerBalance[msg.sender];
+    }
+
+    //function to get the loan detais info
+    function getLoanInfo(uint loanIndex) external view returns (address lender, 
+        address borrower, 
+        uint  loanAmount,
+        uint interestRate,
+        uint loanTerm,
+        uint dueDate,
+        uint amountRepaid,
+        uint penaltyRate,
+        bool active){
+
+        require(
+            loanIndex < borrowerLoans[msg.sender].length,
+            "Invalid loan index"
+        );
+        Loan storage loan = borrowerLoans[msg.sender][loanIndex];
+        return (
+            loan.lender,
+            loan.borrower,
+            loan.loanAmount,
+            loan.interestRate,
+            loan.loanTerm,
+            loan.dueDate,
+            loan.amountRepaid,
+            loan.penaltyRate,
+            loan.active
+        );
     }
 
     //end
