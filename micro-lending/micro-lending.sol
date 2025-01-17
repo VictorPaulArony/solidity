@@ -46,13 +46,20 @@ contract MicroLending {
         bool active;
     }
 
+    //the state variables defination
     //mapping the  address to store borower and lenders info
     mapping(address => Borrower) public borrowers;
     mapping(address => Lender) public lenders;
     mapping(address => Loan[]) public borrowerLoans; // loan for each borrower
     mapping(address => Loan[]) public lenderLoans; //Loans for each lender
     mapping(address => uint) public balance;
-
+    mapping(address => bool) public hasOngoingLoan;
+    mapping(address => bool) public hasOngoingApplication;
+    mapping(address => bool) public hasOngoingInvestment;
+    mapping(uint => LoanApplication) public applications;
+    
+    uint public numApplications;
+    uint public numLoans;
     //define the events for the contract
     event LoanRequested(
         address borrower,
