@@ -17,11 +17,28 @@ contract MicroLending {
         bool repaid;
     }
 
-    //mapping the  address
+    //defining the lender struct
+    struct Lender {
+        string name;
+        address lenderWallet;
+        bool active;
+    }
+
+    //defining the borrower strucct
+    struct Borrower {
+        string name;
+        address borrowerWallet;
+        bool active;
+    }
+
+    //mapping the  address to store borower and lenders info
+    mapping(address => Borrower) public borrowers;
+    mapping(address => Lender) public lenders;
     mapping(address => uint) public lenderBalance;
     mapping(address => uint) public borrowerBalance;
     mapping(address => Loan[]) public borrowerLoans; // loan for each borrower
     mapping(address => Loan[]) public lenderLoans; //Loans for each lender
+    mapping(address => uint) public balance;
 
     //define the events for the contract
     event LoanRequested(
