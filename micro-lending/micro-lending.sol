@@ -15,6 +15,21 @@ contract MicroLending {
         uint penaltyRate;
         bool active;
         bool repaid;
+         uint startTime;
+        uint monthlyCheckpoint;
+        uint originalAmount;
+        uint applicationId;
+    }
+
+    //defining the loan aplication struct
+      struct LoanApplication {
+        bool openApp;
+        uint applicationId;
+        address borrower;
+        uint duration;
+        uint creditAmount;
+        uint interestRate;
+        string otherData;
     }
 
     //defining the lender struct
