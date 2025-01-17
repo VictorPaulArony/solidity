@@ -34,8 +34,6 @@ contract MicroLending {
     //mapping the  address to store borower and lenders info
     mapping(address => Borrower) public borrowers;
     mapping(address => Lender) public lenders;
-    mapping(address => uint) public lenderBalance;
-    mapping(address => uint) public borrowerBalance;
     mapping(address => Loan[]) public borrowerLoans; // loan for each borrower
     mapping(address => Loan[]) public lenderLoans; //Loans for each lender
     mapping(address => uint) public balance;
@@ -76,10 +74,26 @@ contract MicroLending {
 
     //contract functions definations
 
-    //function to enable regiser of lender and deposite to their accounts
-    function registerLender() external payable {
-        require(msg.value > 0, "User must deposit to become a lender. ");
-        lenderBalance[msg.sender] += msg.value;
+    //function to enable regiser of lender accounts
+    function registerLender(string memory _name) external  {
+        require(!lenders[msg.sender].active, "Lender already exists");
+        Lender memory lender;
+        lenders[msg.sender] = lender;//update lender to lenders map
+        lender.name = _name;
+        lender.lenderWallet = msg.sender;
+        lender.active = true;
+        lender[msg.sender] = 0; //initial balance to zero during registration
+    }
+
+    //function to enable regiser of borrower accounts
+    function registerBorrower(string memory _name) external  {
+        require(!borrowers[msg.sender].active, "Borrower already exists");
+        Borrower memory borrower;
+        lenders[msg.sender] = borrower;//update borrower to lenders map
+        borrower.name = _name;
+        borrower.lenderWallet = msg.sender;
+        borrower.active = true;
+        borrower[msg.sender] = 0; //initial balance to zero during registration
     }
 
     //function to register borrower and enable them to ask for loan
