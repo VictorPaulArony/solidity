@@ -158,5 +158,7 @@ Our platform aims to:
 - Integrate with traditional finance systems
 - Develop cross-chain lending capabilities
 - Create a decentralized credit rating system
+- To mitigate Anti-Money Laundering (AML) by implementing  Know Your Customer (KYC) logic algorithms 
+
 
 Through our innovative approach to micro-lending, we're not just creating another DeFi platform – we're building the future of accessible, transparent, and efficient financial services for everyone, everywhere.
