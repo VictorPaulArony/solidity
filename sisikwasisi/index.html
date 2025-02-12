@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisiKwaSisi Crowdfunding</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>SisiKwaSisi Crowdfunding</h1>
+        
+        <div id="connect-wallet">
+            <button id="connectWalletBtn">Connect Wallet</button>
+        </div>
+
+        <div class="campaign-info">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>Goal</h3>
+                    <p id="goalAmount">0 ETH</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Raised</h3>
+                    <p id="raisedAmount">0 ETH</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Time Left</h3>
+                    <p id="timeLeft">0 days</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Contributors</h3>
+                    <p id="contributorsCount">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <div class="actions">
+            <div class="input-group">
+                <input type="number" id="contributeAmount" placeholder="Amount in ETH" step="0.01">
+                <button id="contributeBtn">Contribute</button>
+            </div>
+            
+            <button id="withdrawBtn" style="display: none;">Withdraw Funds</button>
+            <button id="refundBtn" style="display: none;">Request Refund</button>
+            <button id="endCampaignBtn" style="display: none;">End Campaign</button>
+        </div>
+
+        <div id="events">
+            <h3>Recent Events</h3>
+            <div id="eventsList"></div>
+        </div>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
