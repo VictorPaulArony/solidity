@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Head section remains the same -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Management Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.1.1/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+   <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Loan Management Dashboard</h1>
+            <div id="wallet-status" class="status">Please connect your wallet</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('lender')">Lender Dashboard</div>
+            <div class="tab" onclick="switchTab('borrower')">Borrower Dashboard</div>
+        </div>
+
+        <div id="lender-panel" class="panel active">
+            <div class="management-panel">
+                <h2>Search & Manage</h2>
+                <div class="search-section">
+                    <input type="number" id="pool-id-search" placeholder="Enter Pool ID">
+                    <button onclick="getPoolDetails()">Get Pool Details</button>
+                    <input type="number" id="loan-id-search" placeholder="Enter Loan Application ID">
+                    <button onclick="getApplicationDetails()">Get Loan Details</button>
+                </div>
+                <div id="details-container"></div>
+            </div>
+        </div>
+
+        <div id="borrower-panel" class="panel">
+            <div class="management-panel">
+                <h2>Apply for Loan</h2>
+                <div class="borrower-form">
+                    <input type="number" id="borrow-pool-id" placeholder="Enter Pool ID">
+                    <input type="number" id="borrow-amount" placeholder="Amount in ETH">
+                    <select id="loan-duration">
+                        <option value="0">30 Days</option>
+                        <option value="1">60 Days</option>
+                        <option value="2">90 Days</option>
+                    </select>
+                    <input type="text" id="loan-purpose" placeholder="Loan Purpose">
+                    <button onclick="applyForLoan()">Apply for Loan</button>
+                </div>
+                <div class="loans-history">
+                    <h2>My Loans</h2>
+                    <div id="loans-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"> </script>
+</body>
+
+</html>
