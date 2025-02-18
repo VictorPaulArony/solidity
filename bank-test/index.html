@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Bank DApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Bank DApp</h1>
+        
+        <div class="form-group">
+            <label for="deposit">Deposit Amount (ETH)</label>
+            <input type="number" id="deposit" step="0.01" min="0">
+            <button onclick="deposit()">Deposit</button>
+        </div>
+
+        <div class="form-group">
+            <label for="withdraw">Withdraw Amount (ETH)</label>
+            <input type="number" id="withdraw" step="0.01" min="0">
+            <button onclick="withdraw()">Withdraw</button>
+        </div>
+
+        <button onclick="getBalance()">Check Balance</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+    <script>
+        let web3;
+        let contract;
+        const contractAddress = '0xc2355e74dacfc2df426573a3e47083ba2ba70988'; // You'll add this after deployment
+        
+        // ABI will be added after contract compilation
+        const contractABI = [
+			
+        {
+				"inputs": [],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Deposit",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Withdrawal",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "deposit",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getBalance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "withdraw",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		];
+
+        async function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    web3 = new Web3(window.ethereum);
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
+                    updateStatus('Connected to wallet', 'success');
+                } catch (error) {
+                    console.log(error)
+                    updateStatus('Failed to connect to wallet: ' + error.message, 'error');
+                }
+            } else {
+                updateStatus('Please install MetaMask!', 'error');
+            }
+        }
+
+        async function deposit() {
+            try {
+                const amount = document.getElementById('deposit').value;
+                const accounts = await web3.eth.getAccounts();
+                const weiAmount = web3.utils.toWei(amount, 'ether');
+                
+                await contract.methods.deposit().send({
+                    from: accounts[0],
+                    value: weiAmount
+                });
+                
+                updateStatus('Deposit successful!', 'success');
+            } catch (error) {
+                console.log(error)
+                updateStatus('Deposit failed: ' + error.message, 'error');
+            }
+        }
+
+        async function withdraw() {
+            try {
+                const amount = document.getElementById('withdraw').value;
+                const accounts = await web3.eth.getAccounts();
+                const weiAmount = web3.utils.toWei(amount, 'ether');
+                
+                await contract.methods.withdraw(weiAmount).send({
+                    from: accounts[0]
+                });
+                
+                updateStatus('Withdrawal successful!', 'success');
+            } catch (error) {
+                console.log(error)
+                updateStatus('Withdrawal failed: ' + error.message, 'error');
+            }
+        }
+
+        async function getBalance() {
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const balance = await contract.methods.getBalance().call({
+                    from: accounts[0]
+                });
+                
+                const ethBalance = web3.utils.fromWei(balance, 'ether');
+                updateStatus(`Your balance: ${ethBalance} ETH`, 'success');
+            } catch (error) {
+                console.log(error)
+                updateStatus('Failed to get balance: ' + error.message, 'error');
+            }
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = type;
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
