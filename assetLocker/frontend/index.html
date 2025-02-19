@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Locker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Crypto Locker</h1>
+        <button id="connectButton">Connect Wallet</button>
+
+      <!-- Fixed Lock Section -->
+<div class="section">
+    <h2>Join Fixed Lock</h2>
+    <label for="fixedLockDays">Lock Duration (Days):</label>
+    <input type="number" id="fixedLockDays" placeholder="Enter days" />
+    <label for="fixedLockAmount">Amount to Lock (ETH):</label>
+    <input type="number" id="fixedLockAmount" placeholder="Enter amount" step="0.01" />
+    <button id="joinFixedLockButton">Join Fixed Lock</button>
+</div>
+
+<!-- Temp Lock Section -->
+<div class="section">
+    <h2>Join Temp Lock</h2>
+    <label for="tempLockDays">Lock Duration (Days):</label>
+    <input type="number" id="tempLockDays" placeholder="Enter days" />
+    <label for="dailyLimit">Daily Withdrawal Limit (ETH):</label>
+    <input type="number" id="dailyLimit" placeholder="Enter daily limit" step="0.01" />
+    <label for="tempLockAmount">Amount to Lock (ETH):</label>
+    <input type="number" id="tempLockAmount" placeholder="Enter amount" step="0.01" />
+    <button id="joinTempLockButton">Join Temp Lock</button>
+</div>
+
+        <!-- Withdraw Section -->
+        <div class="section">
+            <h2>Withdraw from Temp Lock</h2>
+            <label for="withdrawAmount">Amount to Withdraw (ETH):</label>
+            <input type="number" id="withdrawAmount" placeholder="Enter amount" step="0.01" />
+            <button id="withdrawButton">Withdraw</button>
+        </div>
+
+        <!-- Unlock All Section -->
+        <div class="section">
+            <h2>Unlock All Funds</h2>
+            <button id="unlockAllButton">Unlock All</button>
+        </div>
+
+        <!-- Details Section -->
+        <div class="section">
+            <h2>View Lock Details</h2>
+            <button id="viewFixedLockDetailsButton">View Fixed Lock Details</button>
+            <button id="viewTempLockDetailsButton">View Temp Lock Details</button>
+            <pre id="detailsOutput"></pre>
+        </div>
+
+        <p id="statusMessage"></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
